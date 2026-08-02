@@ -1,0 +1,235 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "TechHire API",
+        "version": "1.0.0",
+        "description": "API documentation for the TechHire equipment booking platform"
+    },
+    "servers": [
+        {
+            "url": "http://localhost:5000",
+            "description": "Local development server"
+        }
+    ],
+    "paths": {
+        "/api/equipment": {
+            "get": {
+                "summary": "Get all equipment",
+                "responses": {
+                    "200": {
+                        "description": "Successful response"
+                    }
+                }
+            },
+            "post": {
+                "summary": "Create equipment",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Equipment"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Equipment created"
+                    }
+                }
+            }
+        },
+        "/api/equipment/{id}": {
+            "get": {
+                "summary": "Get equipment by ID",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/IdParam"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Equipment found"
+                    },
+                    "404": {
+                        "description": "Equipment not found"
+                    }
+                }
+            },
+            "put": {
+                "summary": "Update equipment by ID",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/IdParam"
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Equipment"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Equipment updated"
+                    }
+                }
+            },
+            "delete": {
+                "summary": "Delete equipment by ID",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/IdParam"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Equipment deleted"
+                    }
+                }
+            }
+        },
+        "/api/bookings": {
+            "get": {
+                "summary": "Get all bookings",
+                "responses": {
+                    "200": {
+                        "description": "Successful response"
+                    }
+                }
+            },
+            "post": {
+                "summary": "Create booking",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Booking"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Booking created"
+                    }
+                }
+            }
+        },
+        "/api/bookings/{id}": {
+            "put": {
+                "summary": "Update booking by ID",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/IdParam"
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Booking"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Booking updated"
+                    }
+                }
+            },
+            "delete": {
+                "summary": "Delete booking by ID",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/IdParam"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Booking deleted"
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "parameters": {
+            "IdParam": {
+                "name": "id",
+                "in": "path",
+                "required": true,
+                "description": "Unique resource identifier",
+                "schema": {
+                    "type": "string"
+                }
+            }
+        },
+        "schemas": {
+            "Equipment": {
+                "type": "object",
+                "required": [
+                    "name",
+                    "category",
+                    "pricePerDay"
+                ],
+                "properties": {
+                    "name": {
+                        "type": "string"
+                    },
+                    "category": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "pricePerDay": {
+                        "type": "number"
+                    },
+                    "available": {
+                        "type": "boolean",
+                        "default": true
+                    }
+                }
+            },
+            "Booking": {
+                "type": "object",
+                "required": [
+                    "customerName",
+                    "equipment",
+                    "startDate",
+                    "endDate"
+                ],
+                "properties": {
+                    "customerName": {
+                        "type": "string"
+                    },
+                    "equipment": {
+                        "type": "string",
+                        "description": "Equipment ObjectId"
+                    },
+                    "startDate": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "endDate": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "status": {
+                        "type": "string",
+                        "default": "Pending"
+                    }
+                }
+            }
+        }
+    }
+}
