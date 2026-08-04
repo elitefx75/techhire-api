@@ -1,24 +1,24 @@
-const Equipment = require("../models/Equipment");
+const Equipment = require("../models/equipment");
 
 
 // GET ALL EQUIPMENT
 
-exports.getEquipment = async(req,res)=>{
+exports.getEquipment = async (req, res) => {
 
-try{
+    try {
 
-const equipment = await Equipment.find();
+        const equipment = await Equipment.find();
 
-res.status(200).json(equipment);
+        res.status(200).json(equipment);
 
 
-}catch(error){
+    } catch (error) {
 
-res.status(500).json({
-message:error.message
-});
+        res.status(500).json({
+            message: error.message
+        });
 
-}
+    }
 
 };
 
@@ -27,32 +27,32 @@ message:error.message
 
 // GET SINGLE EQUIPMENT
 
-exports.getEquipmentById = async(req,res)=>{
+exports.getEquipmentById = async (req, res) => {
 
-try{
+    try {
 
-const equipment = await Equipment.findById(req.params.id);
-
-
-if(!equipment){
-
-return res.status(404).json({
-message:"Equipment not found"
-});
-
-}
+        const equipment = await Equipment.findById(req.params.id);
 
 
-res.status(200).json(equipment);
+        if (!equipment) {
+
+            return res.status(404).json({
+                message: "Equipment not found"
+            });
+
+        }
 
 
-}catch(error){
+        res.status(200).json(equipment);
 
-res.status(500).json({
-message:error.message
-});
 
-}
+    } catch (error) {
+
+        res.status(500).json({
+            message: error.message
+        });
+
+    }
 
 };
 
@@ -61,23 +61,23 @@ message:error.message
 
 // CREATE EQUIPMENT
 
-exports.createEquipment = async(req,res)=>{
+exports.createEquipment = async (req, res) => {
 
-try{
+    try {
 
-const equipment = await Equipment.create(req.body);
-
-
-res.status(201).json(equipment);
+        const equipment = await Equipment.create(req.body);
 
 
-}catch(error){
+        res.status(201).json(equipment);
 
-res.status(400).json({
-message:error.message
-});
 
-}
+    } catch (error) {
+
+        res.status(400).json({
+            message: error.message
+        });
+
+    }
 
 };
 
@@ -86,46 +86,46 @@ message:error.message
 
 // UPDATE EQUIPMENT
 
-exports.updateEquipment = async(req,res)=>{
+exports.updateEquipment = async (req, res) => {
 
-try{
-
-
-const equipment = await Equipment.findByIdAndUpdate(
-
-req.params.id,
-
-req.body,
-
-{
-new:true
-}
-
-);
+    try {
 
 
-if(!equipment){
+        const equipment = await Equipment.findByIdAndUpdate(
 
-return res.status(404).json({
-message:"Equipment not found"
-});
+            req.params.id,
 
-}
+            req.body,
 
+            {
+                new: true
+            }
 
-res.status(200).json(equipment);
-
-
-
-}catch(error){
+        );
 
 
-res.status(500).json({
-message:error.message
-});
+        if (!equipment) {
+
+            return res.status(404).json({
+                message: "Equipment not found"
+            });
+
+        }
 
 
-}
+        res.status(200).json(equipment);
+
+
+
+    } catch (error) {
+
+
+        res.status(500).json({
+            message: error.message
+        });
+
+
+    }
 
 };
 
@@ -134,42 +134,42 @@ message:error.message
 
 // DELETE EQUIPMENT
 
-exports.deleteEquipment = async(req,res)=>{
+exports.deleteEquipment = async (req, res) => {
 
 
-try{
+    try {
 
 
-const equipment = await Equipment.findByIdAndDelete(
-req.params.id
-);
+        const equipment = await Equipment.findByIdAndDelete(
+            req.params.id
+        );
 
 
 
-if(!equipment){
+        if (!equipment) {
 
-return res.status(404).json({
-message:"Equipment not found"
-});
+            return res.status(404).json({
+                message: "Equipment not found"
+            });
 
-}
-
-
-res.status(200).json({
-
-message:"Equipment deleted successfully"
-
-});
+        }
 
 
-}catch(error){
+        res.status(200).json({
 
-res.status(500).json({
-message:error.message
-});
+            message: "Equipment deleted successfully"
+
+        });
 
 
-}
+    } catch (error) {
+
+        res.status(500).json({
+            message: error.message
+        });
+
+
+    }
 
 
 };
