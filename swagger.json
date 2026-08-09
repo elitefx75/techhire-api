@@ -159,6 +159,170 @@
                     }
                 }
             }
+        },
+        "/api/payments": {
+            "get": {
+                "summary": "Get all payments",
+                "responses": {
+                    "200": {
+                        "description": "Successful response"
+                    }
+                }
+            },
+            "post": {
+                "summary": "Create payment",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Payment"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Payment created"
+                    }
+                }
+            }
+        },
+        "/api/payments/{id}": {
+            "get": {
+                "summary": "Get payment by ID",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/IdParam"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Payment found"
+                    },
+                    "404": {
+                        "description": "Payment not found"
+                    }
+                }
+            },
+            "put": {
+                "summary": "Update payment by ID",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/IdParam"
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Payment"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Payment updated"
+                    }
+                }
+            },
+            "delete": {
+                "summary": "Delete payment by ID",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/IdParam"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Payment deleted"
+                    }
+                }
+            }
+        },
+        "/api/reviews": {
+            "get": {
+                "summary": "Get all reviews",
+                "responses": {
+                    "200": {
+                        "description": "Successful response"
+                    }
+                }
+            },
+            "post": {
+                "summary": "Create review",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Review"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Review created"
+                    }
+                }
+            }
+        },
+        "/api/reviews/{id}": {
+            "get": {
+                "summary": "Get review by ID",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/IdParam"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Review found"
+                    },
+                    "404": {
+                        "description": "Review not found"
+                    }
+                }
+            },
+            "put": {
+                "summary": "Update review by ID",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/IdParam"
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Review"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Review updated"
+                    }
+                }
+            },
+            "delete": {
+                "summary": "Delete review by ID",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/IdParam"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Review deleted"
+                    }
+                }
+            }
         }
     },
     "components": {
@@ -227,6 +391,77 @@
                     "status": {
                         "type": "string",
                         "default": "Pending"
+                    }
+                }
+            },
+            "Payment": {
+                "type": "object",
+                "required": [
+                    "bookingId",
+                    "userId",
+                    "amount",
+                    "paymentMethod",
+                    "transactionId"
+                ],
+                "properties": {
+                    "bookingId": {
+                        "type": "string",
+                        "description": "Booking ObjectId"
+                    },
+                    "userId": {
+                        "type": "string",
+                        "description": "User ObjectId"
+                    },
+                    "amount": {
+                        "type": "number"
+                    },
+                    "paymentMethod": {
+                        "type": "string",
+                        "enum": [
+                            "mobile_money",
+                            "card",
+                            "cash"
+                        ]
+                    },
+                    "paymentStatus": {
+                        "type": "string",
+                        "enum": [
+                            "pending",
+                            "completed",
+                            "failed",
+                            "refunded"
+                        ],
+                        "default": "pending"
+                    },
+                    "transactionId": {
+                        "type": "string"
+                    }
+                }
+            },
+            "Review": {
+                "type": "object",
+                "required": [
+                    "userId",
+                    "equipmentId",
+                    "rating",
+                    "comment"
+                ],
+                "properties": {
+                    "userId": {
+                        "type": "string",
+                        "description": "User ObjectId"
+                    },
+                    "equipmentId": {
+                        "type": "string",
+                        "description": "Equipment ObjectId"
+                    },
+                    "rating": {
+                        "type": "number",
+                        "minimum": 1,
+                        "maximum": 5
+                    },
+                    "comment": {
+                        "type": "string"
                     }
                 }
             }

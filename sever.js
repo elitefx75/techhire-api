@@ -8,11 +8,15 @@ const session = require("express-session");
 const passport = require("passport");
 const mongoose = require("mongoose");
 const swagger = require("./swagger");
+const authRoutes = require("./routes/auth");
 const equipmentRoutes = require("./routes/equipment");
 const bookingRoutes = require("./routes/booking");
+const paymentRoutes = require("./routes/payment");
+const reviewRoutes = require("./routes/review");
 
 const app = express();
-const port = Number(process.env.PORT) || 5003;
+const port = 5003;
+const host = "127.0.0.1";
 const mongoUri = process.env.MONGO_URI || process.env.MONGODB_URL || "mongodb://127.0.0.1:27017/techhire";
 
 app.set("trust proxy", 1);
@@ -45,26 +49,24 @@ app.get("/", (req, res) => {
     res.send("TechHire app is running");
 });
 
+app.use("/api/auth", authRoutes);
 app.use("/api/equipment", equipmentRoutes);
 app.use("/api/bookings", bookingRoutes);
+app.use("/api/payments", paymentRoutes);
+app.use("/api/reviews", reviewRoutes);
 
-const startServer = (serverPort) => {
-    const server = app.listen(serverPort, () => {
-        console.log(`Server running on http://localhost:${serverPort}`);
+const startServer = () => {
+    const server = app.listen(port, host, () => {
+        console.log(`Server running on  http://localhost:${port}`);
     });
 
     server.on("error", (error) => {
-        if (error.code === "EADDRINUSE") {
-            startServer(serverPort + 1);
-            return;
-        }
-
         console.error("Server error:", error);
         process.exit(1);
     });
 };
 
-startServer(port);
+startServer();
 
 mongoose
     .connect(mongoUri, {
