@@ -1,9 +1,9 @@
-const Review = require('../models/review');
+const review = require('../models/review');
 
 // GET all reviews
 const getReviews = async (req, res) => {
   try {
-    const reviews = await Review.find()
+    const reviews = await review.find()
       .populate('userId')
       .populate('equipmentId');
 
@@ -20,17 +20,17 @@ const getReviews = async (req, res) => {
 // GET review by ID
 const getReviewById = async (req, res) => {
   try {
-    const review = await Review.findById(req.params.id)
+    const reviewDoc = await review.findById(req.params.id)
       .populate('userId')
       .populate('equipmentId');
 
-    if (!review) {
+    if (!reviewDoc) {
       return res.status(404).json({
-        message: 'Review not found'
+        message: 'review not found'
       });
     }
 
-    res.status(200).json(review);
+    res.status(200).json(reviewDoc);
   } catch (error) {
     console.error('Error getting review:', error);
     res.status(500).json({
@@ -62,17 +62,17 @@ const createReview = async (req, res) => {
       });
     }
 
-    const review = new Review({
+    const reviewDoc = new review({
       userId,
       equipmentId,
       rating,
       comment
     });
 
-    const savedReview = await review.save();
+    const savedReview = await reviewDoc.save();
 
     res.status(201).json({
-      message: 'Review created successfully',
+      message: 'review created successfully',
       review: savedReview
     });
   } catch (error) {
@@ -87,7 +87,7 @@ const createReview = async (req, res) => {
 // UPDATE review
 const updateReview = async (req, res) => {
   try {
-    const review = await Review.findByIdAndUpdate(
+    const reviewDoc = await review.findByIdAndUpdate(
       req.params.id,
       req.body,
       {
@@ -96,15 +96,15 @@ const updateReview = async (req, res) => {
       }
     );
 
-    if (!review) {
+    if (!reviewDoc) {
       return res.status(404).json({
-        message: 'Review not found'
+        message: 'review not found'
       });
     }
 
     res.status(200).json({
-      message: 'Review updated successfully',
-      review
+      message: 'review updated successfully',
+      review: reviewDoc
     });
   } catch (error) {
     console.error('Error updating review:', error);
@@ -118,16 +118,16 @@ const updateReview = async (req, res) => {
 // DELETE review
 const deleteReview = async (req, res) => {
   try {
-    const review = await Review.findByIdAndDelete(req.params.id);
+    const reviewDoc = await review.findByIdAndDelete(req.params.id);
 
-    if (!review) {
+    if (!reviewDoc) {
       return res.status(404).json({
         message: 'Review not found'
       });
     }
 
     res.status(200).json({
-      message: 'Review deleted successfully'
+      message: 'review deleted successfully'
     });
   } catch (error) {
     console.error('Error deleting review:', error);
