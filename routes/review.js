@@ -1,4 +1,5 @@
 const express = require('express');
+const { ensureAuthenticated } = require('../middleware/auth');
 
 const router = express.Router();
 
@@ -17,12 +18,12 @@ router.get('/', getReviews);
 router.get('/:id', getReviewById);
 
 // POST review
-router.post('/', createReview);
+router.post('/', ensureAuthenticated, createReview);
 
 // PUT review
-router.put('/:id', updateReview);
+router.put('/:id', ensureAuthenticated, updateReview);
 
 // DELETE review
-router.delete('/:id', deleteReview);
+router.delete('/:id', ensureAuthenticated, deleteReview);
 
 module.exports = router;

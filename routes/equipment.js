@@ -2,10 +2,8 @@ const express = require("express");
 
 const router = express.Router();
 
-
+const { ensureAuthenticated } = require("../middleware/auth");
 const controller = require("../controllers/equipmentControllers");
-
-
 
 router.get("/", controller.getEquipment);
 
@@ -15,18 +13,15 @@ router.get("/:id",
 
 
 
-router.post("/",
-    controller.createEquipment);
+router.post("/", ensureAuthenticated, controller.createEquipment);
 
 
 
-router.put("/:id",
-    controller.updateEquipment);
+router.put("/:id", ensureAuthenticated, controller.updateEquipment);
 
 
 
-router.delete("/:id",
-    controller.deleteEquipment);
+router.delete("/:id", ensureAuthenticated, controller.deleteEquipment);
 
 
 

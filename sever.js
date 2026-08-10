@@ -5,9 +5,10 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
 const session = require("express-session");
-const passport = require("passport");
 const mongoose = require("mongoose");
 const swagger = require("./swagger");
+const passport = require('./config/passport');
+require('./models/user');
 const authRoutes = require("./routes/auth");
 const equipmentRoutes = require("./routes/equipment");
 const bookingRoutes = require("./routes/booking");
@@ -15,8 +16,22 @@ const paymentRoutes = require("./routes/payment");
 const reviewRoutes = require("./routes/review");
 
 const app = express();
-const port = 5003;
-const host = "127.0.0.1";
+const port = process.env.PORT || 5003;
+const host = process.env.HOST || "localhost";
+const isProduction = process.env.NODE_ENV === "production";
+const getBaseUrl = () => {
+    if (process.env.RENDER_EXTERNAL_URL) {
+        return process.env.RENDER_EXTERNAL_URL.trim().replace(/\/$/, "");
+    }
+    if (process.env.APP_URL) {
+        return process.env.APP_URL.trim().replace(/\/$/, "");
+    }
+    return `http://${host}:${port}`;
+};
+
+const githubEnabled = Boolean(process.env.GITHUB_CLIENT_ID && process.env.GITHUB_CLIENT_SECRET);
+const githubCallbackUrl = process.env.GITHUB_CALLBACK_URL || process.env.CALLBACK_URL || process.env.REDIRECT_URI || process.env.RE_DIRECT_URI || `${getBaseUrl()}/api/auth/github/callback`;
+
 const mongoUri = process.env.MONGO_URI || process.env.MONGODB_URL || "mongodb://127.0.0.1:27017/techhire";
 
 app.set("trust proxy", 1);
@@ -30,26 +45,37 @@ app.use(session({
     secret: process.env.SESSION_SECRET || "techhire-secret",
     resave: false,
     saveUninitialized: false,
+    proxy: isProduction,
     cookie: {
         httpOnly: true,
-        sameSite: "lax",
-        secure: false,
+        sameSite: isProduction ? "none" : "lax",
+        secure: isProduction,
         maxAge: 1000 * 60 * 60 * 24
     }
 }));
 app.use(passport.initialize());
 app.use(passport.session());
 
-passport.serializeUser((user, done) => done(null, user));
-passport.deserializeUser((user, done) => done(null, user));
-
 app.use("/api-docs", swagger.serve, swagger.setup);
 
+app.get('/login', (req, res) => {
+    return res.status(401).send(`
+        <h1>Authorization required</h1>
+        <p>Please authenticate before using TechHire API.</p>
+        <a href="/api/auth/github">Authorize with GitHub</a>
+    `);
+});
+
 app.get("/", (req, res) => {
-    res.send("TechHire app is running");
+    if (req.isAuthenticated && req.isAuthenticated()) {
+        return res.send("TechHire app is running");
+    }
+
+    return res.status(401).send('Logged out');
 });
 
 app.use("/api/auth", authRoutes);
+app.use("/auth", authRoutes);
 app.use("/api/equipment", equipmentRoutes);
 app.use("/api/bookings", bookingRoutes);
 app.use("/api/payments", paymentRoutes);
@@ -57,7 +83,7 @@ app.use("/api/reviews", reviewRoutes);
 
 const startServer = () => {
     const server = app.listen(port, host, () => {
-        console.log(`Server running on  http://localhost:${port}`);
+        console.log(`Server running on  http://${host}:${port}`);
     });
 
     server.on("error", (error) => {

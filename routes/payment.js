@@ -1,4 +1,5 @@
 const express = require('express');
+const { ensureAuthenticated } = require('../middleware/auth');
 
 const router = express.Router();
 
@@ -17,12 +18,12 @@ router.get('/', getPayments);
 router.get('/:id', getPaymentById);
 
 // POST payment
-router.post('/', createPayment);
+router.post('/', ensureAuthenticated, createPayment);
 
 // PUT payment
-router.put('/:id', updatePayment);
+router.put('/:id', ensureAuthenticated, updatePayment);
 
 // DELETE payment
-router.delete('/:id', deletePayment);
+router.delete('/:id', ensureAuthenticated, deletePayment);
 
 module.exports = router;

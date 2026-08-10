@@ -1,16 +1,60 @@
 const express = require('express');
+const passport = require('../config/passport');
+
 const router = express.Router();
 
-router.get('/health', (req, res) => {
-    res.status(200).json({ message: 'Auth routes are available' });
+// GitHub login
+router.get(
+    '/github',
+    passport.authenticate('github', {
+        scope: ['user:email']
+    })
+);
+
+// GitHub callback
+router.get(
+    '/github/callback',
+    passport.authenticate('github', {
+        failureRedirect: '/api/auth/login-failed'
+    }),
+    (req, res) => {
+        return res.redirect('http://localhost:5003/');
+    }
+);
+
+// Login failed
+router.get('/login-failed', (req, res) => {
+    res.status(401).json({
+        message: 'GitHub authentication failed'
+    });
 });
 
-router.post('/register', (req, res) => {
-    res.status(501).json({ message: 'Auth registration is not implemented yet' });
+// Current logged-in user
+router.get('/profile', (req, res) => {
+    if (!req.isAuthenticated()) {
+        return res.status(401).json({
+            message: 'Not authenticated'
+        });
+    }
+
+    res.status(200).json({
+        user: req.user
+    });
 });
 
-router.post('/login', (req, res) => {
-    res.status(501).json({ message: 'Auth login is not implemented yet' });
+// Logout
+router.get('/logout', (req, res, next) => {
+    req.logout((error) => {
+        if (error) {
+            return next(error);
+        }
+
+        req.session.destroy(() => {
+            res.status(200).json({
+                message: 'Logged out successfully'
+            });
+        });
+    });
 });
 
 module.exports = router;
