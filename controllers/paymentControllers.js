@@ -1,4 +1,4 @@
-const Payment = require('../models/Payment');
+const Payment = require('../models/payment');
 
 // GET all payments
 const getPayments = async (req, res) => {
