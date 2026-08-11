@@ -58,13 +58,35 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
-app.use("/api-docs", ensureAuthenticated, swagger.serve, swagger.setup);
+app.use("/api-docs", swagger.serve, swagger.setup);
 
 app.get('/login', (req, res) => {
+    if (req.isAuthenticated && req.isAuthenticated()) {
+        return res.send(`
+            <h1>Already logged in</h1>
+            <p><a href="/logout">Logout</a></p>
+        `);
+    }
+
     return res.status(401).send(`
         <h1>Authorization required</h1>
         <a href="/api/auth/github">Authorize with GitHub</a>
     `);
+});
+
+app.get('/logout', (req, res, next) => {
+    req.logout((error) => {
+        if (error) {
+            return next(error);
+        }
+
+        req.session.destroy(() => {
+            res.send(`
+                <h1>Logged out successfully</h1>
+                <p><a href="/login">Login again</a></p>
+            `);
+        });
+    });
 });
 
 app.get("/", (req, res) => {
