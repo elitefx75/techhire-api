@@ -8,6 +8,7 @@ const session = require("express-session");
 const mongoose = require("mongoose");
 const swagger = require("./swagger");
 const passport = require('./config/passport');
+const { ensureAuthenticated } = require('./middleware/auth');
 require('./models/user');
 const authRoutes = require("./routes/auth");
 const equipmentRoutes = require("./routes/equipment");
@@ -17,7 +18,7 @@ const reviewRoutes = require("./routes/review");
 
 const app = express();
 const port = process.env.PORT || 5003;
-const host = process.env.HOST || "localhost";
+const host = process.env.HOST || "0.0.0.0";
 const isProduction = process.env.NODE_ENV === "production";
 const getBaseUrl = () => {
     if (process.env.RENDER_EXTERNAL_URL) {
@@ -56,7 +57,7 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
-app.use("/api-docs", swagger.serve, swagger.setup);
+app.use("/api-docs", ensureAuthenticated, swagger.serve, swagger.setup);
 
 app.get('/login', (req, res) => {
     return res.status(401).send(`
@@ -66,12 +67,8 @@ app.get('/login', (req, res) => {
     `);
 });
 
-app.get("/", (req, res) => {
-    if (req.isAuthenticated && req.isAuthenticated()) {
-        return res.send("TechHire app is running");
-    }
-
-    return res.status(401).send('Logged out');
+app.get("/", ensureAuthenticated, (req, res) => {
+    return res.send("TechHire app is running");
 });
 
 app.use("/api/auth", authRoutes);

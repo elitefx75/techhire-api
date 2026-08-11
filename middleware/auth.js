@@ -3,6 +3,10 @@ const ensureAuthenticated = (req, res, next) => {
         return next();
     }
 
+    if (req.accepts('html')) {
+        return res.redirect('/login');
+    }
+
     return res.status(401).json({
         message: 'Your logged out, login first'
     });

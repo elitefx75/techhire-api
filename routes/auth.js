@@ -18,7 +18,7 @@ router.get(
         failureRedirect: '/api/auth/login-failed'
     }),
     (req, res) => {
-        return res.redirect('http://localhost:5003/');
+        return res.redirect('/');
     }
 );
 
