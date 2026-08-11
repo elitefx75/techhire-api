@@ -19,6 +19,7 @@ const reviewRoutes = require("./routes/review");
 const app = express();
 const port = process.env.PORT || 5003;
 const host = process.env.HOST || "0.0.0.0";
+const displayHost = host === "0.0.0.0" ? "localhost" : host;
 const isProduction = process.env.NODE_ENV === "production";
 const getBaseUrl = () => {
     if (process.env.RENDER_EXTERNAL_URL) {
@@ -27,7 +28,7 @@ const getBaseUrl = () => {
     if (process.env.APP_URL) {
         return process.env.APP_URL.trim().replace(/\/$/, "");
     }
-    return `http://${host}:${port}`;
+    return `http://${displayHost}:${port}`;
 };
 
 const githubEnabled = Boolean(process.env.GITHUB_CLIENT_ID && process.env.GITHUB_CLIENT_SECRET);
@@ -62,13 +63,19 @@ app.use("/api-docs", ensureAuthenticated, swagger.serve, swagger.setup);
 app.get('/login', (req, res) => {
     return res.status(401).send(`
         <h1>Authorization required</h1>
-        <p>Please authenticate before using TechHire API.</p>
         <a href="/api/auth/github">Authorize with GitHub</a>
     `);
 });
 
-app.get("/", ensureAuthenticated, (req, res) => {
-    return res.send("TechHire app is running");
+app.get("/", (req, res) => {
+    if (req.isAuthenticated && req.isAuthenticated()) {
+        const baseUrl = getBaseUrl();
+        return res.send(`<p><a href="${baseUrl}" target="_blank" rel="noopener noreferrer">${baseUrl}</a></p><p>TechHire API is running</p>`);
+    }
+
+    return res.status(200).send(`
+        <p>You are currently logged out.</p>
+    `);
 });
 
 app.use("/api/auth", authRoutes);
@@ -80,7 +87,7 @@ app.use("/api/reviews", reviewRoutes);
 
 const startServer = () => {
     const server = app.listen(port, host, () => {
-        console.log(`Server running on  http://${host}:${port}`);
+        console.log(`Server running on  http://${displayHost}:${port}`);
     });
 
     server.on("error", (error) => {
