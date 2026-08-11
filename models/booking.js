@@ -10,7 +10,7 @@ const bookingSchema = new mongoose.Schema({
 
     equipment: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "equipment",
+        ref: "Equipment",
         required: true
     },
 
