@@ -135,30 +135,32 @@ app.use("/api/bookings", bookingRoutes);
 app.use("/api/payments", paymentRoutes);
 app.use("/api/reviews", reviewRoutes);
 
-app.listen(port, host, () => {
-    console.log(`Server running on http://${displayHost}:${port}`);
-});
+function startServer() {
+    mongoose
+        .connect(mongoUri, {
+            serverSelectionTimeoutMS: 30000,
+            socketTimeoutMS: 45000,
+            connectTimeoutMS: 30000,
+            retryWrites: true,
+            retryReads: true,
+            maxPoolSize: 10,
+            minPoolSize: 2,
+            family: 4
+        })
+        .then(() => {
+            console.log("MongoDB connected successfully");
+            app.listen(port, host, () => {
+                console.log(`Server running on http://${displayHost}:${port}`);
+            });
+        })
+        .catch((error) => {
+            console.error("MongoDB connection failed:", error.message);
+            process.exit(1); // Exit so Render restarts the service
+        });
+}
 
-mongoose
-  .connect(mongoUri, {
-    serverSelectionTimeoutMS: 30000,
-    socketTimeoutMS: 45000,
-    connectTimeoutMS: 30000,
-    retryWrites: true,
-    retryReads: true,
-    maxPoolSize: 10,
-    minPoolSize: 2,
-    family: 4
-  })
-  .then(() => {
-    console.log("MongoDB connected successfully");
+if (require.main === module || process.env.START_SERVER === "true") {
+    startServer();
+}
 
-    // Start server only after DB connection
-    app.listen(port, host, () => {
-      console.log(`Server running on http://${displayHost}:${port}`);
-    });
-  })
-  .catch((error) => {
-    console.error("MongoDB connection failed:", error.message);
-    process.exit(1); // Exit so Render restarts the service
-  });
+module.exports = { app, startServer };
