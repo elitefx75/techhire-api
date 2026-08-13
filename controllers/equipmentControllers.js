@@ -98,7 +98,8 @@ exports.updateEquipment = async (req, res) => {
             req.body,
 
             {
-                new: true
+                new: true,
+                runValidators: true
             }
 
         );
@@ -120,7 +121,7 @@ exports.updateEquipment = async (req, res) => {
     } catch (error) {
 
 
-        res.status(500).json({
+        res.status(400).json({
             message: error.message
         });
 
