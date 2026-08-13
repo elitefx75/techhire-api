@@ -2,10 +2,10 @@
     "name": "techhire-api",
     "version": "1.0.0",
     "description": "TechHire API with Swagger documentation",
-    "main": "sever.js",
+    "main": "server.js",
     "scripts": {
-        "start": "node sever.js",
-        "dev": "node sever.js",
+        "start": "node server.js",
+        "dev": "node server.js",
         "test": "mocha \"tests/**/*.test.js\" --timeout 5000",
         "test:watch": "mocha \"tests/**/*.test.js\" --timeout 5000 --watch"
     },
