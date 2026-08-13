@@ -19,7 +19,7 @@ router.get(
     }),
     (req, res) => {
         const appBaseUrl = process.env.RENDER_EXTERNAL_URL || process.env.APP_URL || `${req.protocol}://${req.get('host')}`;
-        return res.redirect(appBaseUrl.replace(/\/$/, '') + '/');
+        return res.redirect(appBaseUrl.replace(/\/$/, '') + '/login');
     }
 );
 
