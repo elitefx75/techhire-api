@@ -36,7 +36,11 @@ const githubEnabled = Boolean(process.env.GITHUB_CLIENT_ID && process.env.GITHUB
 
 const githubCallbackUrl = process.env.RENDER_EXTERNAL_URL || process.env.GITHUB_CALLBACK_URL || process.env.CALLBACK_URL || process.env.REDIRECT_URI || process.env.RE_DIRECT_URI || `${getBaseUrl()}/api/auth/github/callback`;
 
-const mongoUri = process.env.MONGO_URI || process.env.MONGODB_URL || "mongodb://127.0.0.1:27017/techhire";
+const mongoUri =
+    process.env.MONGODB_URL ||
+    process.env.MONGO_URI ||
+    process.env.MONGODB_URI ||
+    process.env.MONGO_URL;
 
 app.set("trust proxy", 1);
 app.use(cors({
@@ -131,25 +135,34 @@ app.use("/api/bookings", bookingRoutes);
 app.use("/api/payments", paymentRoutes);
 app.use("/api/reviews", reviewRoutes);
 
-// ✅ Connect to MongoDB first, then start server
-mongoose
-  .connect(mongoUri, {
-    serverSelectionTimeoutMS: 30000,
-    socketTimeoutMS: 45000,
-    connectTimeoutMS: 30000,
-    retryWrites: true,
-    retryReads: true,
-    maxPoolSize: 10,
-    minPoolSize: 2,
-    family: 4
-  })
-  .then(() => {
-    console.log("MongoDB connected successfully");
+const startServer = () => {
     app.listen(port, host, () => {
-      console.log(`Server running on http://${displayHost}:${port}`);
+        console.log(`Server running on http://${displayHost}:${port}`);
     });
-  })
-  .catch((error) => {
-    console.error("MongoDB connection failed:", error.message);
-    process.exit(1); // Exit so Render restarts the service
-  });
+};
+
+if (mongoUri) {
+    mongoose
+        .connect(mongoUri, {
+            serverSelectionTimeoutMS: 30000,
+            socketTimeoutMS: 45000,
+            connectTimeoutMS: 30000,
+            retryWrites: true,
+            retryReads: true,
+            maxPoolSize: 10,
+            minPoolSize: 2,
+            family: 4
+        })
+        .then(() => {
+            console.log("MongoDB connected successfully");
+            startServer();
+        })
+        .catch((error) => {
+            console.error("MongoDB connection failed:", error.message);
+            console.warn("Starting server without database connectivity. Add MONGODB_URL/MONGO_URI in Render to fix this.");
+            startServer();
+        });
+} else {
+    console.warn("MONGODB_URL/MONGO_URI is not set. Starting server without database connectivity.");
+    startServer();
+}
