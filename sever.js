@@ -75,6 +75,23 @@ mongoose.connection.on('error', (error) => {
 
 app.use("/api-docs", swagger.serve, swagger.setup);
 
+// Health check endpoint
+app.get('/health', (req, res) => {
+    const mongoStatus = mongoose.connection.readyState;
+    const statusMap = {
+        0: 'disconnected',
+        1: 'connected',
+        2: 'connecting',
+        3: 'disconnecting'
+    };
+
+    res.json({
+        status: mongoStatus === 1 ? 'healthy' : 'degraded',
+        database: statusMap[mongoStatus],
+        timestamp: new Date().toISOString()
+    });
+});
+
 app.get('/login', (req, res) => {
     if (req.isAuthenticated && req.isAuthenticated()) {
         return res.send(`
@@ -124,13 +141,15 @@ app.listen(port, host, () => {
 
 mongoose
     .connect(mongoUri, {
-        serverSelectionTimeoutMS: 5000,
+        serverSelectionTimeoutMS: 15000,
         socketTimeoutMS: 45000,
-        connectTimeoutMS: 10000,
+        connectTimeoutMS: 15000,
+        waitQueueTimeoutMS: 15000,
         retryWrites: true,
         retryReads: true,
         maxPoolSize: 10,
-        minPoolSize: 2
+        minPoolSize: 2,
+        family: 4
     })
     .then(() => {
         console.log("MongoDB connected successfully");
