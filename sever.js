@@ -140,21 +140,27 @@ app.listen(port, host, () => {
 });
 
 mongoose
-    .connect(mongoUri, {
-        serverSelectionTimeoutMS: 30000,
-        socketTimeoutMS: 45000,
-        connectTimeoutMS: 30000,
-        waitQueueTimeoutMS: 30000,
-        retryWrites: true,
-        retryReads: true,
-        maxPoolSize: 10,
-        minPoolSize: 2,
-        family: 4
-    })
-    .then(() => {
-        console.log("MongoDB connected successfully");
-    })
-    .catch((error) => {
-        console.warn("MongoDB connection failed, continuing without database:", error.message);
+  .connect(mongoUri, {
+    serverSelectionTimeoutMS: 30000,
+    socketTimeoutMS: 45000,
+    connectTimeoutMS: 30000,
+    retryWrites: true,
+    retryReads: true,
+    maxPoolSize: 10,
+    minPoolSize: 2,
+    family: 4
+  })
+  .then(() => {
+    console.log("MongoDB connected successfully");
+
+    // Start server only after DB connection
+    app.listen(port, host, () => {
+      console.log(`Server running on http://${displayHost}:${port}`);
     });
+  })
+  .catch((error) => {
+    console.error("MongoDB connection failed:", error.message);
+    process.exit(1); // Exit so Render restarts the service
+  });
+
 
