@@ -2,15 +2,17 @@ const passport = require('passport');
 const GitHubStrategy = require('passport-github2').Strategy;
 
 const getGitHubCallbackUrl = () => {
-  // If an explicit callback URL is provided, use it directly to avoid duplication
+  // Prefer the deployed app URL when running in Render or any hosted environment.
+  const deployedBaseUrl = process.env.RENDER_EXTERNAL_URL || process.env.APP_URL || process.env.CALLBACK_URL || process.env.REDIRECT_URI || process.env.RE_DIRECT_URI;
+  if (deployedBaseUrl) {
+    return `${deployedBaseUrl.trim().replace(/\/$/, '')}/auth/github/callback`;
+  }
+
+  // Only use a direct GitHub callback override when no deployed host is available.
   if (process.env.GITHUB_CALLBACK_URL) {
     return process.env.GITHUB_CALLBACK_URL.trim();
   }
-  // Prefer Render-provided external URL when available (deployed environment)
-  const baseUrl = process.env.RENDER_EXTERNAL_URL || process.env.APP_URL || process.env.CALLBACK_URL || process.env.REDIRECT_URI || process.env.RE_DIRECT_URI;
-  if (baseUrl) {
-    return `${baseUrl.trim().replace(/\/$/, '')}/auth/github/callback`;
-  }
+
   const port = process.env.PORT || 4000;
   return `http://localhost:${port}/auth/github/callback`;
 };
