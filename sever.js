@@ -98,8 +98,6 @@ app.get('/login', (req, res) => {
             <h1>TechHire api is running</h1>
         `);
     }
-
-    // Redirect straight to GitHub OAuth instead of showing an authorization page
     return res.redirect('/api/auth/github');
 });
 
@@ -108,7 +106,6 @@ app.get('/logout', (req, res, next) => {
         if (error) {
             return next(error);
         }
-
         req.session.destroy(() => {
             res.send(`
                 <h1>Logged out successfully</h1>
@@ -122,7 +119,6 @@ app.get("/", (req, res) => {
         const baseUrl = getBaseUrl();
         return res.send(`TechHire API is running`);
     }
-
     return res.status(200).send(`
         <p>You are logged out.</p>
     `);
@@ -135,10 +131,7 @@ app.use("/api/bookings", bookingRoutes);
 app.use("/api/payments", paymentRoutes);
 app.use("/api/reviews", reviewRoutes);
 
-app.listen(port, host, () => {
-    console.log(`Server running on http://${displayHost}:${port}`);
-});
-
+// ✅ Connect to MongoDB first, then start server
 mongoose
   .connect(mongoUri, {
     serverSelectionTimeoutMS: 30000,
@@ -152,8 +145,6 @@ mongoose
   })
   .then(() => {
     console.log("MongoDB connected successfully");
-
-    // Start server only after DB connection
     app.listen(port, host, () => {
       console.log(`Server running on http://${displayHost}:${port}`);
     });
@@ -162,5 +153,3 @@ mongoose
     console.error("MongoDB connection failed:", error.message);
     process.exit(1); // Exit so Render restarts the service
   });
-
-
