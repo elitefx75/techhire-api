@@ -129,7 +129,6 @@ mongoose
         connectTimeoutMS: 10000,
         retryWrites: true,
         retryReads: true,
-        bufferCommands: false,
         maxPoolSize: 10,
         minPoolSize: 2
     })
