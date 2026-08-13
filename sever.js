@@ -60,6 +60,35 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
+// Database connection monitoring
+let isDbConnected = false;
+
+mongoose.connection.on('connected', () => {
+    isDbConnected = true;
+    console.log("MongoDB connection established");
+});
+
+mongoose.connection.on('disconnected', () => {
+    isDbConnected = false;
+    console.log("MongoDB connection lost");
+});
+
+mongoose.connection.on('error', (error) => {
+    isDbConnected = false;
+    console.warn("MongoDB connection error:", error.message);
+});
+
+// Middleware to handle database errors
+app.use((req, res, next) => {
+    if (!isDbConnected && req.path.startsWith('/api/')) {
+        return res.status(503).json({
+            message: "Database connection unavailable. Please try again later.",
+            status: "service_unavailable"
+        });
+    }
+    next();
+});
+
 app.use("/api-docs", swagger.serve, swagger.setup);
 
 app.get('/login', (req, res) => {
@@ -111,9 +140,14 @@ app.listen(port, host, () => {
 
 mongoose
     .connect(mongoUri, {
-        serverSelectionTimeoutMS: 3000,
-        socketTimeoutMS: 3000,
-        connectTimeoutMS: 3000
+        serverSelectionTimeoutMS: 5000,
+        socketTimeoutMS: 45000,
+        connectTimeoutMS: 10000,
+        retryWrites: true,
+        retryReads: true,
+        bufferCommands: false,
+        maxPoolSize: 10,
+        minPoolSize: 2
     })
     .then(() => {
         console.log("MongoDB connected successfully");
