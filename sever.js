@@ -141,10 +141,10 @@ app.listen(port, host, () => {
 
 mongoose
     .connect(mongoUri, {
-        serverSelectionTimeoutMS: 15000,
+        serverSelectionTimeoutMS: 30000,
         socketTimeoutMS: 45000,
-        connectTimeoutMS: 15000,
-        waitQueueTimeoutMS: 15000,
+        connectTimeoutMS: 30000,
+        waitQueueTimeoutMS: 30000,
         retryWrites: true,
         retryReads: true,
         maxPoolSize: 10,
