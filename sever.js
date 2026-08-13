@@ -17,10 +17,11 @@ const paymentRoutes = require("./routes/payment");
 const reviewRoutes = require("./routes/review");
 
 const app = express();
-const port = process.env.PORT || 5003;
+const port = process.env.PORT || 4000;
 const host = process.env.HOST || "0.0.0.0";
 const displayHost = host === "0.0.0.0" ? "localhost" : host;
 const isProduction = process.env.NODE_ENV === "production";
+
 const getBaseUrl = () => {
     if (process.env.RENDER_EXTERNAL_URL) {
         return process.env.RENDER_EXTERNAL_URL.trim().replace(/\/$/, "");
@@ -32,7 +33,8 @@ const getBaseUrl = () => {
 };
 
 const githubEnabled = Boolean(process.env.GITHUB_CLIENT_ID && process.env.GITHUB_CLIENT_SECRET);
-const githubCallbackUrl = process.env.GITHUB_CALLBACK_URL || process.env.CALLBACK_URL || process.env.REDIRECT_URI || process.env.RE_DIRECT_URI || `${getBaseUrl()}/api/auth/github/callback`;
+// Prefer Render external URL if present so deployed callback URL is used
+const githubCallbackUrl = process.env.RENDER_EXTERNAL_URL || process.env.GITHUB_CALLBACK_URL || process.env.CALLBACK_URL || process.env.REDIRECT_URI || process.env.RE_DIRECT_URI || `${getBaseUrl()}/api/auth/github/callback`;
 
 const mongoUri = process.env.MONGO_URI || process.env.MONGODB_URL || "mongodb://127.0.0.1:27017/techhire";
 
@@ -68,10 +70,8 @@ app.get('/login', (req, res) => {
         `);
     }
 
-    return res.status(401).send(`
-        <h1>Authorization required</h1>
-        <a href="/api/auth/github">Authorize with GitHub</a>
-    `);
+    // Redirect straight to GitHub OAuth instead of showing an authorization page
+    return res.redirect('/api/auth/github');
 });
 
 app.get('/logout', (req, res, next) => {
@@ -83,7 +83,6 @@ app.get('/logout', (req, res, next) => {
         req.session.destroy(() => {
             res.send(`
                 <h1>Logged out successfully</h1>
-                <p><a href="/login">Login again</a></p>
             `);
         });
     });
@@ -92,7 +91,7 @@ app.get('/logout', (req, res, next) => {
 app.get("/", (req, res) => {
     if (req.isAuthenticated && req.isAuthenticated()) {
         const baseUrl = getBaseUrl();
-        return res.send(`<p><a href="${baseUrl}" target="_blank" rel="noopener noreferrer">${baseUrl}</a></p><p>TechHire API is running</p>`);
+        return res.send(`TechHire API is running`);
     }
 
     return res.status(200).send(`
@@ -107,18 +106,9 @@ app.use("/api/bookings", bookingRoutes);
 app.use("/api/payments", paymentRoutes);
 app.use("/api/reviews", reviewRoutes);
 
-const startServer = () => {
-    const server = app.listen(port, host, () => {
-        console.log(`Server running on  http://${displayHost}:${port}`);
-    });
-
-    server.on("error", (error) => {
-        console.error("Server error:", error);
-        process.exit(1);
-    });
-};
-
-startServer();
+app.listen(port, host, () => {
+    console.log(`Server running on http://${displayHost}:${port}`);
+});
 
 mongoose
     .connect(mongoUri, {
