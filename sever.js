@@ -65,8 +65,7 @@ app.use("/api-docs", swagger.serve, swagger.setup);
 app.get('/login', (req, res) => {
     if (req.isAuthenticated && req.isAuthenticated()) {
         return res.send(`
-            <h1>Already logged in</h1>
-            <p><a href="/logout">Logout</a></p>
+            <h1>TechHire api is running</h1>
         `);
     }
 
@@ -95,7 +94,7 @@ app.get("/", (req, res) => {
     }
 
     return res.status(200).send(`
-        <p>You are currently logged out.</p>
+        <p>You are logged out.</p>
     `);
 });
 
