@@ -75,7 +75,7 @@ mongoose.connection.on('error', (error) => {
     console.warn("MongoDB connection error:", error.message);
 });
 
-app.use("/api-docs", ensureAuthenticated, swagger.serve, swagger.setup);
+app.use("/api-docs", swagger.serve, swagger.setup);
 
 // Health check endpoint
 app.get('/health', (req, res) => {
