@@ -36,7 +36,9 @@ const githubEnabled = Boolean(process.env.GITHUB_CLIENT_ID && process.env.GITHUB
 
 const githubCallbackUrl = process.env.RENDER_EXTERNAL_URL || process.env.GITHUB_CALLBACK_URL || process.env.CALLBACK_URL || process.env.REDIRECT_URI || process.env.RE_DIRECT_URI || `${getBaseUrl()}/api/auth/github/callback`;
 
-const mongoUri = process.env.MONGO_URI || process.env.MONGODB_URL || "mongodb://127.0.0.1:27017/techhire";
+const mongoUri = process.env.MONGODB_URI || process.env.MONGO_URI || process.env.MONGODB_URL || process.env.MONGO_URL || (
+    process.env.NODE_ENV === "production" ? null : "mongodb://127.0.0.1:27017/techhire"
+);
 
 app.set("trust proxy", 1);
 app.use(cors({
@@ -136,6 +138,11 @@ app.use("/api/payments", paymentRoutes);
 app.use("/api/reviews", reviewRoutes);
 
 function startServer() {
+    if (!mongoUri) {
+        console.error("MongoDB connection string not configured. Set MONGODB_URI or MONGO_URI in Render.");
+        process.exit(1);
+    }
+
     mongoose
         .connect(mongoUri, {
             serverSelectionTimeoutMS: 30000,
