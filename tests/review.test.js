@@ -222,6 +222,77 @@ describe('Review Controller', () => {
 
             expect(res.status.calledWith(404)).to.be.true;
         });
+
+        it('should enforce required fields on review update', async () => {
+            const reviewId = new mongoose.Types.ObjectId();
+
+            // Simulate MongoDB validation error for missing required field
+            const validationError = new Error('Validation failed: rating is required');
+            validationError.name = 'ValidationError';
+
+            sandbox.stub(Review, 'findByIdAndUpdate').rejects(validationError);
+
+            const req = {
+                params: { id: reviewId },
+                body: { comment: 'Updated comment' } // Missing rating
+            };
+            const res = {
+                status: sandbox.stub().returns({ json: sandbox.stub() })
+            };
+
+            await reviewControllers.updateReview(req, res);
+
+            // Should return 400 for validation error, not 500
+            expect(res.status.calledWith(400)).to.be.true;
+        });
+
+        it('should return 400 when rating is out of range on update', async () => {
+            const reviewId = new mongoose.Types.ObjectId();
+            const validationError = new Error('Validation failed: rating must be between 1 and 5');
+            validationError.name = 'ValidationError';
+
+            sandbox.stub(Review, 'findByIdAndUpdate').rejects(validationError);
+
+            const req = {
+                params: { id: reviewId },
+                body: { rating: 10 } // Invalid: should be 1-5
+            };
+            const res = {
+                status: sandbox.stub().returns({ json: sandbox.stub() })
+            };
+
+            await reviewControllers.updateReview(req, res);
+
+            expect(res.status.calledWith(400)).to.be.true;
+        });
+
+        it('should allow partial updates with runValidators', async () => {
+            const reviewId = new mongoose.Types.ObjectId();
+            const updatedReview = {
+                _id: reviewId,
+                rating: 4,
+                comment: 'Updated comment'
+            };
+
+            sandbox.stub(Review, 'findByIdAndUpdate').resolves(updatedReview);
+
+            const req = {
+                params: { id: reviewId },
+                body: { rating: 4, comment: 'Updated comment' }
+            };
+            const res = {
+                status: sandbox.stub().returns({ json: sandbox.stub() })
+            };
+
+            await reviewControllers.updateReview(req, res);
+
+            // Should succeed with 200 status
+            expect(res.status.calledWith(200)).to.be.true;
+
+            // Verify findByIdAndUpdate was called with runValidators: true
+            const call = Review.findByIdAndUpdate.getCall(0);
+            expect(call.args[2].runValidators).to.equal(true);
+        });
     });
 
     describe('deleteReview', () => {

@@ -191,6 +191,56 @@ describe('Payment Controller', () => {
 
             expect(res.status.calledWith(404)).to.be.true;
         });
+
+        it('should enforce required fields on payment update', async () => {
+            const paymentId = new mongoose.Types.ObjectId();
+
+            // Simulate MongoDB validation error for missing required field
+            const validationError = new Error('Validation failed: amount is required');
+            validationError.name = 'ValidationError';
+
+            sandbox.stub(Payment, 'findByIdAndUpdate').rejects(validationError);
+
+            const req = {
+                params: { id: paymentId },
+                body: { paymentStatus: 'completed' } // Missing amount
+            };
+            const res = {
+                status: sandbox.stub().returns({ json: sandbox.stub() })
+            };
+
+            await paymentControllers.updatePayment(req, res);
+
+            // Should return 400 for validation error, not 500
+            expect(res.status.calledWith(400)).to.be.true;
+        });
+
+        it('should allow partial updates with runValidators', async () => {
+            const paymentId = new mongoose.Types.ObjectId();
+            const updatedPayment = {
+                _id: paymentId,
+                paymentStatus: 'completed'
+            };
+
+            sandbox.stub(Payment, 'findByIdAndUpdate').resolves(updatedPayment);
+
+            const req = {
+                params: { id: paymentId },
+                body: { paymentStatus: 'completed' }
+            };
+            const res = {
+                status: sandbox.stub().returns({ json: sandbox.stub() })
+            };
+
+            await paymentControllers.updatePayment(req, res);
+
+            // Should succeed with 200 status
+            expect(res.status.calledWith(200)).to.be.true;
+
+            // Verify findByIdAndUpdate was called with runValidators: true
+            const call = Payment.findByIdAndUpdate.getCall(0);
+            expect(call.args[2].runValidators).to.equal(true);
+        });
     });
 
     describe('deletePayment', () => {
