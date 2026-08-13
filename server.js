@@ -137,68 +137,6 @@ app.use("/api/bookings", bookingRoutes);
 app.use("/api/payments", paymentRoutes);
 app.use("/api/reviews", reviewRoutes);
 
-// Error handling middleware
-app.use((err, req, res, next) => {
-    if (!req.isAuthenticated || !req.isAuthenticated()) {
-        return res.status(err.status || 500).send(`
-            <!DOCTYPE html>
-            <html lang="en">
-            <head>
-            <meta charset="utf-8">
-            <title>Error</title>
-            </head>
-            <body>
-            <h1>Please login first</h1>
-            </body>
-            </html>
-        `);
-    }
-
-    res.status(err.status || 500).send(`
-        <!DOCTYPE html>
-        <html lang="en">
-        <head>
-        <meta charset="utf-8">
-        <title>Error</title>
-        </head>
-        <body>
-        <pre>${err.message || 'Internal Server Error'}</pre>
-        </body>
-        </html>
-    `);
-});
-
-// 404 handler
-app.use((req, res) => {
-    if (!req.isAuthenticated || !req.isAuthenticated()) {
-        return res.status(404).send(`
-            <!DOCTYPE html>
-            <html lang="en">
-            <head>
-            <meta charset="utf-8">
-            <title>Error</title>
-            </head>
-            <body>
-            <h1>Please login first</h1>
-            </body>
-            </html>
-        `);
-    }
-
-    res.status(404).send(`
-        <!DOCTYPE html>
-        <html lang="en">
-        <head>
-        <meta charset="utf-8">
-        <title>Error</title>
-        </head>
-        <body>
-        <pre>Cannot ${req.method} ${req.path}</pre>
-        </body>
-        </html>
-    `);
-});
-
 function startServer() {
     if (!mongoUri) {
         console.error("MongoDB connection string not configured. Set MONGODB_URI or MONGO_URI in Render.");
