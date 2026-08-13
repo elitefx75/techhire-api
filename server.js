@@ -137,6 +137,24 @@ app.use("/api/bookings", bookingRoutes);
 app.use("/api/payments", paymentRoutes);
 app.use("/api/reviews", reviewRoutes);
 
+// Error handling middleware
+app.use((err, req, res, next) => {
+    res.status(err.status || 500).send(`
+
+        <h1>Please login first</h1>
+
+    `);
+});
+
+// 404 handler
+app.use((req, res) => {
+    res.status(404).send(`
+
+        <h1>Please login first</h1>
+      
+    `);
+});
+
 function startServer() {
     if (!mongoUri) {
         console.error("MongoDB connection string not configured. Set MONGODB_URI or MONGO_URI in Render.");
