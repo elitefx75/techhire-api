@@ -15,6 +15,7 @@ const equipmentRoutes = require("./routes/equipment");
 const bookingRoutes = require("./routes/booking");
 const paymentRoutes = require("./routes/payment");
 const reviewRoutes = require("./routes/review");
+const { requireLoginForWrites } = require('./middleware/writeAuth');
 
 const app = express();
 const port = process.env.PORT || 4000;
@@ -132,10 +133,10 @@ app.get("/", (req, res) => {
 
 app.use("/api/auth", authRoutes);
 app.use("/auth", authRoutes);
-app.use("/api/equipment", equipmentRoutes);
-app.use("/api/bookings", bookingRoutes);
-app.use("/api/payments", paymentRoutes);
-app.use("/api/reviews", reviewRoutes);
+app.use("/api/equipment", requireLoginForWrites, equipmentRoutes);
+app.use("/api/bookings", requireLoginForWrites, bookingRoutes);
+app.use("/api/payments", requireLoginForWrites, paymentRoutes);
+app.use("/api/reviews", requireLoginForWrites, reviewRoutes);
 
 function startServer() {
     if (!mongoUri) {
